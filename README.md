@@ -1,12 +1,12 @@
 # A live poll for a nonprofit session
 
-As a solo founder I ship weekly. The core action in a live session is tiny: push a named answer, then show who's still in the room. This example pins that logic in `run_poll`. The `PollRequest` dataclass spells out the request shape for a Python service so I'm not juggling raw dicts.
+I run a one-person SaaS and ship every week. A live session needs just two things: record a named answer, then show who's present. This example locks that flow in `run_poll`. The `PollRequest` dataclass defines the request shape for my Python service. Saves me from handling raw dicts.
 
-Infrai handles the realtime channel, publish, token, and presence behind one key. That's undifferentiated plumbing I'd rather outsource. The service stays short, and the browser gets a scoped token instead of a server secret.
+Infrai covers the realtime channel, publish, token, and presence behind one key. That's plumbing I don't want to build. Outsource the undifferentiated, keep revenue per hour high. My service stays small, and the browser gets a scoped token, not my secret.
 
 ## Follow the event
 
-`run_poll.py` models a coordinator firing one question. It makes `nonprofit-session`, publishes the selected `training` option, and pulls the current audience. With `INFRAI_API_KEY` set, run:
+`run_poll.py` models a coordinator pushing one question. It builds `nonprofit-session`, publishes the chosen `training` option, and fetches the live audience. Set `INFRAI_API_KEY` and run:
 
 ```bash
 export INFRAI_API_KEY=your-key
@@ -15,27 +15,27 @@ python3 -m venv .venv
 .venv/bin/python run_poll.py
 ```
 
-You should see:
+Expected output:
 
 ```text
 Published donor-priority on nonprofit-session; participants=3
 ```
 
-The client sends `POST` for writes and `GET` for presence. It checks the `{ok, data, error, metadata}` envelope before calling a response good, and backs off on transient rate limits. `issue_token` is there when a browser needs a client-scoped subscription token.
+The client uses `POST` for writes and `GET` for presence. It validates the `{ok, data, error, metadata}` envelope before marking a response ok, and backs off on rate limits. `issue_token` handles the browser's need for a client-scoped subscription token.
 
 ## Check the business rule
 
-I test the one rule that matters: the answer must be among the declared options, then the service publishes it and reports the live member count. No network required for this:
+I only test the rule that pays: answer must be in the declared options, then publish and report live count. No network needed:
 
 ```bash
 .venv/bin/python -m pytest -q
 ```
 
-All reusable code sits in `src/poll_service.py`. One module on purpose. The example has a single concept: turn a session answer into a visible realtime result.
+Reusable code lives in `src/poll_service.py`. One module, intentional. The example shows one idea: a session answer becomes a visible realtime result.
 
 ## Going to production: Nonprofit Live Poll Python
 
-Quick start above gets you moving. For a real deployment you'll also need the details below for Nonprofit Live Poll Python.
+The quick start gets you moving. Real deploy needs the details below for Nonprofit Live Poll Python.
 
 **Account & key**
 
